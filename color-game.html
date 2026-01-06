@@ -26,8 +26,8 @@
         /* כפתור חזרה לגרסה הישנה - צד ימין למטה */
         .old-version-btn {
             position: fixed;
-            bottom: 20px; /* שיניתי ללמטה */
-            right: 20px;  /* שיניתי לימין */
+            bottom: 20px;
+            right: 20px;
             background: #fff;
             color: #636e72;
             padding: 10px 20px;
@@ -86,13 +86,22 @@
             transition: width 0.1s linear;
         }
 
+        #word-container {
+            margin: 20px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         #word-display {
             font-size: 80px;
-            font-weight: 800;
-            margin: 20px 0;
+            /* הפונט ייקבע דינמית ב-JS */
+            font-weight: 800; 
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
             transition: transform 0.2s;
             cursor: default;
+            direction: rtl;
         }
 
         #input-area {
@@ -106,6 +115,7 @@
             transition: all 0.3s;
             box-sizing: border-box;
             background: #fafafa;
+            font-family: 'Segoe UI', sans-serif; /* פונט קבוע לקלט כדי שיהיה קריא */
         }
 
         #input-area:focus {
@@ -203,16 +213,18 @@
         <div id="timer-bar" class="timer-fill"></div>
     </div>
 
-    <div id="word-display">מוכן?</div>
+    <div id="word-container">
+        <div id="word-display">מוכן?</div>
+    </div>
     
     <input type="text" id="input-area" placeholder="הקלד את צבע המילה..." autocomplete="off" disabled>
-    <div class="hint">טיפ: לא צריך ללחוץ Enter, רק לכתוב נכון!</div>
+    <div class="hint">טיפ: הצבעים והפונטים משתנים כל הזמן!</div>
 
     <div id="start-screen" class="start-screen">
         <h1>משחק הצבעים 🎨</h1>
         <p class="instructions">
-            המטרה: להקליד את <b>הצבע</b> של המילה, ולא את מה שכתוב.<br>
-            למשל, אם כתוב "כחול" בצבע אדום - כתוב <b>"אדום"</b>.
+            המטרה: להקליד את <b>הצבע</b> שהמילה צבועה בו.<br>
+            שימו לב: כל אות צבועה בגוון שונה, והפונטים מתחלפים!
         </p>
         <button class="btn" onclick="startGame()">התחל משחק</button>
     </div>
@@ -225,23 +237,41 @@
 </div>
 
 <script>
-    const colorsData = [
-        { name: 'אדום', hex: '#ef5350' },
-        { name: 'כחול', hex: '#42a5f5' },
-        { name: 'ירוק', hex: '#66bb6a' },
-        { name: 'צהוב', hex: '#fdd835' },
-        { name: 'סגול', hex: '#ab47bc' },
-        { name: 'ורוד', hex: '#ff4081' },
-        { name: 'כתום', hex: '#ffa726' },
-        { name: 'שחור', hex: '#2d3436' }
+    // מאגר צבעים מורחב - שם הצבע ומערך של גוונים לאותו צבע
+    const colorPalettes = {
+        'אדום': ['#FF0000', '#B71C1C', '#FF5252', '#D32F2F', '#E53935', '#FF1744', '#C62828'],
+        'כחול': ['#2980b9', '#3498db', '#0984e3', '#1e3799', '#4a69bd', '#0c2461', '#1976D2'],
+        'ירוק': ['#27ae60', '#2ecc71', '#00b894', '#006266', '#10ac84', '#388E3C', '#43A047'],
+        'צהוב': ['#f1c40f', '#f39c12', '#fbc531', '#e1b12c', '#FBC02D', '#FFD600'],
+        'סגול': ['#8e44ad', '#9b59b6', '#8c7ae6', '#9c88ff', '#6D214F', '#7B1FA2', '#AA00FF'],
+        'ורוד': ['#e84393', '#fd79a8', '#e91e63', '#ff4081', '#C2185B', '#F50057'],
+        'כתום': ['#e67e22', '#d35400', '#fa8231', '#e55039', '#F57C00', '#EF6C00'],
+        'שחור': ['#2d3436', '#000000', '#1e272e', '#2C3A47', '#353b48'],
+        'חום':  ['#795548', '#5D4037', '#8D6E63', '#4E342E', '#6D4C41', '#3E2723'],
+        'אפור': ['#636e72', '#b2bec3', '#757575', '#616161', '#9E9E9E'],
+        'טורקיז': ['#00cec9', '#81ecec', '#00BCD4', '#0097A7', '#26c6da']
+    };
+
+    // רשימת פונטים "מבלבלים" ושונים
+    const fonts = [
+        '"Comic Sans MS", cursive',
+        'Impact, fantasy',
+        '"Courier New", monospace',
+        'Georgia, serif',
+        '"Times New Roman", serif',
+        'Arial, sans-serif',
+        '"Trebuchet MS", sans-serif',
+        '"Brush Script MT", cursive',
+        'Verdana, sans-serif',
+        'Tahoma, sans-serif'
     ];
 
     let score = 0;
     let timeLeft = 30;
     let timerInterval;
-    let currentTargetColorName = '';
+    let currentTargetColorName = ''; // הצבע שהמשתמש צריך להקליד
     let isPlaying = false;
-    let highScore = localStorage.getItem('colorGameHighScore') || 0;
+    let highScore = localStorage.getItem('colorGameHighScoreV2') || 0;
 
     const wordDisplay = document.getElementById('word-display');
     const inputArea = document.getElementById('input-area');
@@ -291,15 +321,34 @@
     }
 
     function nextRound() {
-        const randomTextObj = colorsData[Math.floor(Math.random() * colorsData.length)];
-        const randomColorObj = colorsData[Math.floor(Math.random() * colorsData.length)];
+        const colorNames = Object.keys(colorPalettes);
         
-        wordDisplay.textContent = randomTextObj.name;
-        wordDisplay.style.color = randomColorObj.hex;
-        currentTargetColorName = randomColorObj.name;
+        // בחירת המילה שתהיה כתובה (הטקסט)
+        const textName = colorNames[Math.floor(Math.random() * colorNames.length)];
         
+        // בחירת הצבע שבו המילה תופיע (התשובה הנכונה)
+        const colorName = colorNames[Math.floor(Math.random() * colorNames.length)];
+        
+        // בחירת פונט רנדומלי
+        const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
+        wordDisplay.style.fontFamily = randomFont;
+
+        // בניית המילה עם גוונים שונים לכל אות
+        let htmlContent = '';
+        const shades = colorPalettes[colorName]; // קבלת רשימת הגוונים של הצבע הנבחר
+
+        for (let char of textName) {
+            // בחירת גוון רנדומלי מתוך רשימת הגוונים של הצבע הנבחר
+            const randomShade = shades[Math.floor(Math.random() * shades.length)];
+            htmlContent += `<span style="color: ${randomShade}">${char}</span>`;
+        }
+
+        wordDisplay.innerHTML = htmlContent;
+        currentTargetColorName = colorName;
+        
+        // אנימציה קטנה
         wordDisplay.classList.remove('pop');
-        void wordDisplay.offsetWidth;
+        void wordDisplay.offsetWidth; // Trigger reflow
         wordDisplay.classList.add('pop');
     }
 
@@ -322,7 +371,7 @@
         
         if (score > highScore) {
             highScore = score;
-            localStorage.setItem('colorGameHighScore', highScore);
+            localStorage.setItem('colorGameHighScoreV2', highScore);
             highScoreDisplay.textContent = `שיא: ${highScore}`;
         }
 
