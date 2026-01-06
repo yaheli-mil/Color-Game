@@ -23,6 +23,30 @@
             user-select: none;
         }
 
+        /* כפתור חזרה לגרסה הישנה - צד ימין למטה */
+        .old-version-btn {
+            position: fixed;
+            bottom: 20px; /* שיניתי ללמטה */
+            right: 20px;  /* שיניתי לימין */
+            background: #fff;
+            color: #636e72;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            border: 1px solid #dfe6e9;
+            z-index: 100;
+        }
+
+        .old-version-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            color: var(--primary);
+        }
+
         .container {
             background: var(--card-bg);
             padding: 2rem;
@@ -167,6 +191,8 @@
 </head>
 <body>
 
+<a href="old.html" class="old-version-btn">חזרה לגרסה הישנה ⏪</a>
+
 <div class="container">
     <div class="stats-bar">
         <span id="score">ניקוד: 0</span>
@@ -183,7 +209,7 @@
     <div class="hint">טיפ: לא צריך ללחוץ Enter, רק לכתוב נכון!</div>
 
     <div id="start-screen" class="start-screen">
-        <h1>משחק הצבעים 🎨</h1>
+        <h1>משחק הצבעים 2.0 🎨</h1>
         <p class="instructions">
             המטרה: להקליד את <b>הצבע</b> של המילה, ולא את מה שכתוב.<br>
             למשל, אם כתוב "כחול" בצבע אדום - כתוב <b>"אדום"</b>.
@@ -199,12 +225,11 @@
 </div>
 
 <script>
-    // הגדרת הצבעים - המפתח ללוגיקה תקינה
     const colorsData = [
         { name: 'אדום', hex: '#ef5350' },
         { name: 'כחול', hex: '#42a5f5' },
         { name: 'ירוק', hex: '#66bb6a' },
-        { name: 'צהוב', hex: '#fdd835' }, // צהוב כהה יותר לקריאות
+        { name: 'צהוב', hex: '#fdd835' },
         { name: 'סגול', hex: '#ab47bc' },
         { name: 'ורוד', hex: '#ff4081' },
         { name: 'כתום', hex: '#ffa726' },
@@ -214,11 +239,10 @@
     let score = 0;
     let timeLeft = 30;
     let timerInterval;
-    let currentTargetColorName = ''; // הצבע שאנחנו מצפים שהמשתמש יקליד
+    let currentTargetColorName = '';
     let isPlaying = false;
     let highScore = localStorage.getItem('colorGameHighScore') || 0;
 
-    // אלמנטים מה-DOM
     const wordDisplay = document.getElementById('word-display');
     const inputArea = document.getElementById('input-area');
     const scoreDisplay = document.getElementById('score');
@@ -228,11 +252,9 @@
     const startScreen = document.getElementById('start-screen');
     const finalScoreDisplay = document.getElementById('final-score');
 
-    // אתחול ראשוני
     highScoreDisplay.textContent = `שיא: ${highScore}`;
 
     function startGame() {
-        // איפוס משתנים
         score = 0;
         timeLeft = 30;
         isPlaying = true;
@@ -246,7 +268,6 @@
         updateTimerVisuals();
         nextRound();
 
-        // התחלת הטיימר
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             timeLeft--;
@@ -262,7 +283,6 @@
         const percentage = (timeLeft / 30) * 100;
         timerBar.style.width = percentage + "%";
         
-        // שינוי צבע הבר כשהזמן נגמר
         if (percentage < 20) {
             timerBar.style.background = "#ff7675";
         } else {
@@ -271,36 +291,26 @@
     }
 
     function nextRound() {
-        // בחירת מילה רנדומלית (הטקסט שמופיע)
         const randomTextObj = colorsData[Math.floor(Math.random() * colorsData.length)];
-        
-        // בחירת צבע רנדומלי (הצבע הויזואלי - התשובה הנכונה)
         const randomColorObj = colorsData[Math.floor(Math.random() * colorsData.length)];
         
-        // הצגה על המסך
         wordDisplay.textContent = randomTextObj.name;
         wordDisplay.style.color = randomColorObj.hex;
-        
-        // שמירת התשובה הנכונה
         currentTargetColorName = randomColorObj.name;
         
-        // אנימציה קטנה של החלפה
         wordDisplay.classList.remove('pop');
-        void wordDisplay.offsetWidth; // טריק לאתחול האנימציה
+        void wordDisplay.offsetWidth;
         wordDisplay.classList.add('pop');
     }
 
     function checkInput() {
         if (!isPlaying) return;
-
         const userInput = inputArea.value.trim().toLowerCase();
         
-        // בדיקה אם המשתמש הקליד את המילה הנכונה
         if (userInput === currentTargetColorName) {
-            // תשובה נכונה!
             score++;
             scoreDisplay.textContent = "ניקוד: " + score;
-            inputArea.value = ''; // ניקוי מהיר
+            inputArea.value = '';
             nextRound();
         }
     }
@@ -310,7 +320,6 @@
         clearInterval(timerInterval);
         inputArea.disabled = true;
         
-        // עדכון שיא
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('colorGameHighScore', highScore);
@@ -318,15 +327,11 @@
         }
 
         finalScoreDisplay.textContent = score;
-        overlay.style.display = 'flex'; // שימוש ב-flex כדי למרכז
+        overlay.style.display = 'flex';
     }
 
-    // מאזין לאירועים - בודק כל הקשה
     inputArea.addEventListener('input', checkInput);
-
-    // מניעת רמאות קלה (הדבקה) - אופציונלי
     inputArea.addEventListener('paste', (e) => e.preventDefault());
-
 </script>
 
 </body>
