@@ -10,36 +10,43 @@
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
+        /* תיקון חשוב: דואג שפאדינג לא ירחיב את האלמנטים מעבר לרוחב המסך */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body {
-            /* שימוש בפונט החדש */
             font-family: 'Rubik', sans-serif;
             background-color: #f4f4f4;
             color: #333;
             margin: 0;
             padding: 0;
             line-height: 1.6;
+            overflow-x: hidden; /* מונע גלילה צדדית מיותרת */
         }
 
         header {
             background-color: #0056b3;
             color: white;
-            padding: 30px 0; /* קצת יותר מרווח */
+            padding: 30px 20px; /* הוספת פאדינג בצדדים */
             text-align: center;
             border-bottom: 5px solid #004494;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
         }
 
         header h1 {
             margin: 0;
             font-size: 3rem;
-            font-weight: 700; /* מודגש יותר */
+            font-weight: 700;
             letter-spacing: -1px;
+            line-height: 1.2;
         }
 
         header p {
             margin: 10px 0 0;
             font-size: 1.3rem;
-            font-weight: 300; /* דק יותר לכותרת משנה */
+            font-weight: 300;
             opacity: 0.9;
         }
 
@@ -49,7 +56,7 @@
             margin: 40px auto;
             background: white;
             padding: 40px;
-            border-radius: 12px; /* פינות יותר עגולות */
+            border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
 
@@ -74,7 +81,7 @@
         }
 
         .project-item:hover {
-            transform: translateY(-3px); /* אפקט ריחוף עדין */
+            transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             border-color: #dbe4ef;
         }
@@ -85,6 +92,8 @@
             background: #f0f4f8;
             width: 70px;
             height: 70px;
+            /* מונע מהאייקון להתכווץ */
+            flex-shrink: 0; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -109,11 +118,11 @@
 
         .btn {
             display: inline-block;
-            background-color: #0056b3; /* תואם לכותרת */
+            background-color: #0056b3;
             color: white;
             padding: 10px 25px;
             text-decoration: none;
-            border-radius: 50px; /* כפתור עגול יותר */
+            border-radius: 50px;
             font-weight: 500;
             font-size: 0.95rem;
             transition: all 0.3s;
@@ -132,6 +141,34 @@
             color: #888;
             border-top: 1px solid #eee;
             background: white;
+        }
+
+        /* --- התאמה למובייל (קוד חדש) --- */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .container {
+                width: 92%; /* מרחיב את הקונטיינר במובייל */
+                padding: 25px 20px; /* מקטין את הפאדינג הפנימי */
+                margin: 20px auto;
+            }
+
+            .project-item {
+                flex-direction: column; /* מסדר את האייקון והטקסט אחד מתחת לשני */
+                text-align: center;
+                padding: 20px;
+            }
+
+            .project-icon {
+                margin-left: 0;
+                margin-bottom: 15px; /* רווח מלמטה במקום מהצד */
+            }
+
+            .project-info h3 {
+                font-size: 1.25rem;
+            }
         }
     </style>
 </head>
