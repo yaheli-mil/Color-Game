@@ -91,33 +91,6 @@
             transition: width 0.1s linear, background 0.3s;
         }
 
-        .timer-bonus {
-            animation: flashGreen 0.5s ease;
-        }
-        
-        @keyframes flashGreen {
-            0% { filter: brightness(1); }
-            50% { filter: brightness(1.5); box-shadow: 0 0 10px #00b894; }
-            100% { filter: brightness(1); }
-        }
-
-        .plus-time {
-            position: absolute;
-            top: 55px;
-            right: 30px;
-            color: #00b894;
-            font-weight: bold;
-            font-size: 1.5rem;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .plus-time.show {
-            opacity: 1;
-            transform: translateY(-25px) scale(1.2);
-        }
-
         #word-container {
             margin: 20px 0;
             min-height: 120px; 
@@ -155,17 +128,14 @@
             box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
         }
 
-        .shake { animation: shake 0.5s; border-color: #ff7675 !important; }
-        .pop { animation: pop 0.2s; }
-        
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
-            100% { transform: translateX(0); }
+        .hint {
+            font-size: 0.8rem;
+            color: #b2bec3;
+            margin-top: 10px;
         }
 
+        .pop { animation: pop 0.2s; }
+        
         @keyframes pop {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -212,20 +182,24 @@
             justify-content: center;
             align-items: center;
             border-radius: 20px;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .instructions {
             font-size: 0.9rem;
             color: #636e72;
-            margin-bottom: 20px;
-            max-width: 80%;
+            margin-bottom: 10px;
+            max-width: 90%;
             line-height: 1.5;
         }
-        
-        .hint {
-            font-size: 0.8rem;
-            color: #b2bec3;
-            margin-top: 10px;
+
+        .instructions-note {
+            font-size: 0.95rem;
+            color: #2d3436;
+            margin-bottom: 20px;
+            max-width: 90%;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -242,19 +216,21 @@
     <div class="timer-container">
         <div id="timer-bar" class="timer-fill"></div>
     </div>
-    <div id="time-bonus-indicator" class="plus-time">+2</div>
 
     <div id="word-container">
         <div id="word-display">מוכן?</div>
     </div>
     
     <input type="text" id="input-area" placeholder="הקלד את צבע המילה..." autocomplete="off" disabled>
-    <div class="hint">טיפ: כל תשובה נכונה מוסיפה זמן!</div>
+    <div class="hint">אין צורך ללחוץ ENTER - התשובה נבדקת אוטומטית</div>
 
     <div id="start-screen" class="start-screen">
         <h1>משחק הצבעים 🎨</h1>
         <p class="instructions">
             המטרה: להקליד את <b>הצבע</b> שהמילה צבועה בו.
+        </p>
+        <p class="instructions-note">
+            שימו לב: כל אות צבועה בגוון שונה, והפונטים מתחלפים!
         </p>
         <button class="btn" onclick="startGame()">התחל משחק</button>
     </div>
@@ -308,7 +284,6 @@
     const overlay = document.getElementById('overlay');
     const startScreen = document.getElementById('start-screen');
     const finalScoreDisplay = document.getElementById('final-score');
-    const timeBonusIndicator = document.getElementById('time-bonus-indicator');
 
     highScoreDisplay.textContent = `שיא: ${highScore}`;
 
@@ -378,17 +353,6 @@
         wordDisplay.classList.add('pop');
     }
 
-    function showTimeBonus() {
-        timeBonusIndicator.classList.remove('show');
-        void timeBonusIndicator.offsetWidth;
-        timeBonusIndicator.classList.add('show');
-        
-        timerBar.parentElement.classList.add('timer-bonus');
-        setTimeout(() => {
-            timerBar.parentElement.classList.remove('timer-bonus');
-        }, 500);
-    }
-
     function checkInput() {
         if (!isPlaying) return;
         const userInput = inputArea.value.trim().toLowerCase();
@@ -401,7 +365,6 @@
             if (timeLeft > MAX_TIME) timeLeft = MAX_TIME; 
             
             updateTimerVisuals();
-            showTimeBonus();
 
             inputArea.value = '';
             nextRound();
